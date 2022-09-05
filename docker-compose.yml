@@ -1,0 +1,39 @@
+version: '3.5'
+
+services:
+
+### MySQL ################################################
+    mysql:
+      image: mysql
+      environment:
+        - MYSQL_DATABASE=dendenmushi
+        - MYSQL_ROOT_PASSWORD=123456
+      volumes:
+        - ./Database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      ports:
+        - "3306:3306"
+
+### API ################################################
+    api:
+      build:
+        context: ./API_DenDenMushi
+        dockerfile: API_DenDenMushi/Dockerfile
+      environment:
+        - DBHOST=mysql
+        - MYSQL_PASSWORD=123456
+      depends_on:
+        - mysql
+      ports:
+        - "5000:80"
+
+### INTERFACE ################################################
+    app:
+      build:
+        context: ./Interface
+        dockerfile: Dockerfile
+      command: yarn start
+      volumes:
+        - ./src:/src
+        - /app/node_modules
+      ports:
+        - "3000:3000"
